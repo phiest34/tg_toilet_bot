@@ -25,7 +25,7 @@ class PoopRepository {
 
     fun getTopFivePoopTime(): String {
         val stringBuilder = StringBuilder()
-        poopHistory.sortedByDescending { it.poopingTimeInMillis }.subList(0, 4).forEachIndexed { index, poopModel ->
+        poopHistory.sortedByDescending { it.poopingTimeInMillis }.subList(0, 5).forEachIndexed { index, poopModel ->
             stringBuilder.append(
                 "${index + 1}. ${poopModel.userName} срал ${poopModel.formattedPoopingTime}\n"
             )
