@@ -9,7 +9,7 @@ data class PoopModel(
     var endedPoopingAt: Long = 0
 ) {
     override fun toString(): String {
-        return "$userName $startedPoopingAt $endedPoopingAt"
+        return "$userName $startedPoopingAt $endedPoopingAt "
     }
 
     val poopingDate: String
@@ -29,7 +29,7 @@ data class PoopModel(
             }
         }
 
-    private val poopingTimeInMillis
+    val poopingTimeInMillis
         get() = endedPoopingAt - startedPoopingAt
 
     private val poopingTimeInSeconds

@@ -23,6 +23,16 @@ class PoopRepository {
         }
     }
 
+    fun getTopFivePoopTime(): String {
+        val stringBuilder = StringBuilder()
+        poopHistory.sortedByDescending { it.poopingTimeInMillis }.subList(0, 4).forEachIndexed { index, poopModel ->
+            stringBuilder.append(
+                "${index + 1}. ${poopModel.userName} срал ${poopModel.formattedPoopingTime}\n"
+            )
+        }
+        return stringBuilder.toString()
+    }
+
     fun setPoopInfo(userName: String) {
         poopHistory.add(PoopModel(userName, System.currentTimeMillis()))
     }
@@ -39,7 +49,6 @@ class PoopRepository {
         var endedPoopingAt by Delegates.notNull<Long>()
         File(FILENAME).apply {
             readText()
-                .trim(',')
                 .split(' ')
                 .forEachIndexed { index, s ->
                     when (index % 3) {
@@ -56,7 +65,7 @@ class PoopRepository {
 
     suspend fun logData() = withContext(Dispatchers.IO) {
         File(FILENAME).apply {
-            writeText(poopHistory.joinToString { "$it" })
+            writeText(poopHistory.joinToString(separator = "") { "$it" })
         }
     }
 

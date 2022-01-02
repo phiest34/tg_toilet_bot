@@ -29,7 +29,7 @@ class ToiletBot(botKey: String) {
             onCommand("start", requireOnlyCommandInMessage = true) {
                 reply(
                     it,
-                    "Привет, работяги, меня зовут ${me.firstName}, \nпожалуйста пишите каждый раз 'Я СРУ', перед тем как идти в туалет, и 'Я ПОСРАЛ' после окончания процесса. Так же пользуйтесь командами 'КТО СРАЛ' и кто 'КТО СРЕТ'"
+                    "Привет, работяги, меня зовут ${me.firstName}, \nпожалуйста пишите каждый раз 'Я СРУ', перед тем как идти в туалет, и 'Я ПОСРАЛ' после окончания процесса. Так же пользуйтесь командами 'КТО СРАЛ', 'КТО СРЕТ', 'ТОП СРУНОВ'"
                 )
             }
             onContentMessage { contentMessage ->
@@ -55,13 +55,13 @@ class ToiletBot(botKey: String) {
                                             getChatMember(
                                                 contentMessage.chat.id,
                                                 repository.currentPoopingPersonId!!
-                                            )
+                                            ).user.username
                                         }}"
                                     )
                                 }
                             }
                         }
-                        "Я ПОСРАЛ" -> {
+                        "Я ПОСРАЛ", "Я ПОСРАЛА" -> {
                             repository.currentPoopingPersonId = null
                             contentMessage.asFromUser()?.user?.let {
                                 if (repository.getPoopInfoByUserName(
@@ -96,6 +96,9 @@ class ToiletBot(botKey: String) {
                         }
                         "КТО СРАЛ" -> {
                             sendMessage(contentMessage.chat, repository.getPoopHistory())
+                        }
+                        "ТОП СРУНОВ" -> {
+                            sendMessage(contentMessage.chat, "ТОП 5 СРУНОВ\n${repository.getTopFivePoopTime()}")
                         }
                     }
                 }
