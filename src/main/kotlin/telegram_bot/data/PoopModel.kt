@@ -1,5 +1,6 @@
 package telegram_bot.data
 
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 data class PoopModel(
@@ -7,6 +8,13 @@ data class PoopModel(
     val startedPoopingAt: Long,
     var endedPoopingAt: Long = 0
 ) {
+    override fun toString(): String {
+        return "$userName $startedPoopingAt $endedPoopingAt"
+    }
+
+    val poopingDate: String
+        get() = Date(endedPoopingAt).toString()
+
     val isPooping
         get() = endedPoopingAt == 0L
 

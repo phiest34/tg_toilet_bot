@@ -77,6 +77,7 @@ class ToiletBot(botKey: String) {
                                                     it.username?.username ?: it.firstName
                                                 ).formattedPoopingTime
                                     )
+                                    repository.logData()
                                 } else {
                                     sendMessage(contentMessage.chat, "В данный момент вы не срали !!")
                                 }
