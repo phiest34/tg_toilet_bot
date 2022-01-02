@@ -20,13 +20,15 @@ class PoopRepository {
     }
 
     fun getPoopInfoByUserName(userName: String): PoopModel = poopHistory.last {
-        userName == userName
+        userName == it.userName
     }
 
     fun getPoopHistory() = if (poopHistory.isNotEmpty()) {
-            "Пользователь\t Срал\n${poopHistory.map {
-                "${it.userName}\t${it.formattedPoopingTime}"
-            }.joinToString(separator = "\n")}"
+            "Пользователь\t Срал\n${
+                poopHistory.joinToString(separator = "\n") {
+                    "${it.userName}\t${if (it.isPooping) "Срет сейчас" else it.formattedPoopingTime}"
+                }
+            }"
     } else {
         "Пока что никто не срал."
     }

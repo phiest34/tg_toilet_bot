@@ -64,7 +64,7 @@ class ToiletBot(botKey: String) {
                         "Я ПОСРАЛ" -> {
                             repository.currentPoopingPersonId = null
                             contentMessage.asFromUser()?.user?.let {
-                                if (!repository.getPoopInfoByUserName(
+                                if (repository.getPoopInfoByUserName(
                                         it.username?.username ?: it.firstName
                                     ).isPooping
                                 ) {

@@ -8,7 +8,7 @@ data class PoopModel(
     var endedPoopingAt: Long = 0
 ) {
     val isPooping
-        get() = endedPoopingAt != 0L
+        get() = endedPoopingAt == 0L
 
     val formattedPoopingTime: String
         get() {
