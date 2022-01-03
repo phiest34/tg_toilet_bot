@@ -1,27 +1,33 @@
 package telegram_bot.data
 
 import dev.inmo.tgbotapi.types.UserId
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
+import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
 
-class PoopRepository {
+class PoopRepository : CoroutineScope {
 
     private val poopHistory = mutableListOf<PoopModel>()
 
     @Volatile
     var currentPoopingPersonId: UserId? = null
+        private set
+
+    var jobPoopMap = mutableMapOf<PoopModel, Job?>()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
-            deserializeFromFile()
-            println(poopHistory.toString())
+        launch {
+            withContext(Dispatchers.IO) {
+                deserializeFromFile()
+            }
         }
     }
+
 
     fun getTopFivePoopTime(): String {
         val stringBuilder = StringBuilder()
@@ -33,14 +39,22 @@ class PoopRepository {
         return stringBuilder.toString()
     }
 
-    fun setPoopInfo(userName: String) {
-        poopHistory.add(PoopModel(userName, System.currentTimeMillis()))
+    fun setPoopInfo(userId: UserId?, userName: String, job: Job?) {
+        currentPoopingPersonId = userId
+        PoopModel(userName, System.currentTimeMillis()).also {
+            jobPoopMap[it] = job
+            poopHistory.add(it)
+        }
     }
 
     fun setPoopEnded(userName: String) {
         poopHistory.last {
             it.userName == userName
-        }.endedPoopingAt = System.currentTimeMillis()
+        }.also {
+            jobPoopMap[it]?.cancel()
+            it.endedPoopingAt = System.currentTimeMillis()
+        }
+        currentPoopingPersonId = null
     }
 
     private fun deserializeFromFile() {
@@ -82,6 +96,11 @@ class PoopRepository {
     } else {
         "Пока что никто не срал."
     }
+
+    private fun <T, R> pairOf(first: T, second: R): Pair<T, R> = Pair(first, second)
+
+    private fun <T, R> isPairNullByFields(pair: Pair<T?, R?>) =
+        pair.first == null && pair.second == null
 
     companion object {
         private const val FILENAME = "src/main/kotlin/telegram_bot/log/Log.txt"

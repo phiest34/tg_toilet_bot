@@ -35,5 +35,4 @@ data class PoopModel(
     private val poopingTimeInSeconds
         get() = TimeUnit.MILLISECONDS.toSeconds(poopingTimeInMillis)
 
-
 }
