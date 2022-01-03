@@ -37,7 +37,7 @@ class ToiletBot(botKey: String) {
             onCommand("start", requireOnlyCommandInMessage = true) {
                 reply(
                     it,
-                    "Привет, работяги, меня зовут ${me.firstName}, \nпожалуйста пишите каждый раз 'Я СРУ', перед тем как идти в туалет, и 'Я ПОСРАЛ' после окончания процесса. Так же пользуйтесь командами 'КТО СРАЛ', 'КТО СРЕТ', 'ТОП СРУНОВ'"
+                    "Привет, работяги, меня зовут ${me.firstName}, \nпожалуйста пишите каждый раз 'Я СРУ', перед тем как идти в туалет, и 'Я ПОСРАЛ' после окончания процесса. Так же пользуйтесь командами 'КТО СРАЛ', 'КТО СРЕТ', 'ТОП СРУНОВ', 'CКОЛЬКО ПОСРАНО'"
                 )
             }
             onCommand("rules", requireOnlyCommandInMessage = true) {
@@ -118,6 +118,9 @@ class ToiletBot(botKey: String) {
                         "ТОП СРУНОВ" -> {
                             sendMessage(contentMessage.chat, "ТОП 5 СРУНОВ\n${repository.getTopFivePoopTime()}")
                         }
+                        "СКОЛЬКО ПОСРАНО" -> {
+                            sendMessage(contentMessage.chat, "ВСЕГО СРАЛИ ${repository.getPoopingSum()}")
+                        }
                     }
                 }
             }
@@ -142,7 +145,10 @@ class ToiletBot(botKey: String) {
             }
             3 -> {
                 runDelayed(500) {
-                    bot.sendMessage(chatId, "$username не забывай о правилах туалета! Узнать их можно с помощью команды /rules")
+                    bot.sendMessage(
+                        chatId,
+                        "$username не забывай о правилах туалета! Узнать их можно с помощью команды /rules"
+                    )
                 }
             }
         }

@@ -2,6 +2,7 @@ package telegram_bot.data
 
 import dev.inmo.tgbotapi.types.UserId
 import kotlinx.coroutines.*
+import telegram_bot.util.asMillyGetFormatTime
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
@@ -28,6 +29,15 @@ class PoopRepository : CoroutineScope {
         }
     }
 
+    fun getPoopingSum(): String {
+        var sum = 0L
+        poopHistory.forEach {
+            if (it.poopingTimeInMillis >= 0L) {
+                sum += it.poopingTimeInMillis
+            }
+        }
+        return sum.asMillyGetFormatTime()
+    }
 
     fun getTopFivePoopTime(): String {
         val stringBuilder = StringBuilder()

@@ -1,7 +1,7 @@
 package telegram_bot.data
 
+import telegram_bot.util.asMillyGetFormatTime
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 data class PoopModel(
     val userName: String,
@@ -19,20 +19,9 @@ data class PoopModel(
         get() = endedPoopingAt == 0L
 
     val formattedPoopingTime: String
-        get() {
-            return if (poopingTimeInSeconds > 59) {
-                val minutes = poopingTimeInMillis / 1000 / 60
-                val seconds = poopingTimeInMillis / 1000 % 60
-                "$minutes мин. и $seconds сек."
-            } else {
-                "$poopingTimeInSeconds сек."
-            }
-        }
+        get() = poopingTimeInMillis.asMillyGetFormatTime()
 
     val poopingTimeInMillis
         get() = endedPoopingAt - startedPoopingAt
-
-    private val poopingTimeInSeconds
-        get() = TimeUnit.MILLISECONDS.toSeconds(poopingTimeInMillis)
 
 }
