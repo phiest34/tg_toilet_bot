@@ -33,13 +33,13 @@ class ToiletBot(botKey: String) {
             onCommand("start", requireOnlyCommandInMessage = true) {
                 reply(
                     it,
-                    "Привет, работяги, меня зовут ${me.firstName}, \nпожалуйста пишите каждый раз 'Я СРУ', перед тем как идти в туалет, и 'Я ПОСРАЛ' после окончания процесса. Так же пользуйтесь командами 'КТО СРАЛ', 'КТО СРЕТ', 'ТОП СРУНОВ', 'CКОЛЬКО ПОСРАНО'"
+                    "Привет, работяги, меня зовут ${me.firstName}, \nпожалуйста пишите каждый раз 'Я СРУ', перед тем как идти в туалет, и 'Я ПОСРАЛ' после окончания процесса. Так же пользуйтесь командами 'КТО СРАЛ', 'КТО СРЕТ', 'ТОП СРУНОВ', 'CКОЛЬКО ПОСРАНО', 'ТОП ПОХОДОВ'"
                 )
             }
             onCommand("rules", requireOnlyCommandInMessage = true) {
                 reply(
                     it,
-                    "1. Занимать туалет не больше 20 минут\n2. Перед тем как идти срать, обязательно узнать 'КТО СРЕТ'\n3. В толчок туалетку не бросать!!"
+                    "1. Занимать туалет не больше 20 минут\n2. Перед тем как идти срать, обязательно узнать 'КТО СРЕТ'\n3. В толчок туалетку не бросать!!\n4. Когда бак с водой начинает шуметь водой не пользуемся"
                 )
             }
             onContentMessage { contentMessage ->
@@ -114,10 +114,13 @@ class ToiletBot(botKey: String) {
                             sendMessage(contentMessage.chat, repository.getPoopHistory())
                         }
                         "ТОП СРУНОВ" -> {
-                            sendMessage(contentMessage.chat, "ТОП 5 СРУНОВ\n${repository.getTopFivePoopTime()}")
+                            sendMessage(contentMessage.chat, "ТОП 5 СРУНОВ\n${repository.getTopFiveUser()}")
                         }
                         "СКОЛЬКО ПОСРАНО" -> {
                             sendMessage(contentMessage.chat, "ВСЕГО СРАЛИ ${repository.getPoopingSum()}")
+                        }
+                        "ТОП ПОХОДОВ" -> {
+                            sendMessage(contentMessage.chat, "ТОП 5 СРУНОВ\n${repository.getTopFivePoopTime()}")
                         }
                     }
                 }
@@ -134,7 +137,6 @@ class ToiletBot(botKey: String) {
         runCatching {
             val twoMinutesMilly = 2 * 60 * 1000L
             val threeMinutesMilly = 3 * 60 * 1000L
-            val sevenMinutesMilly = 7 * 60 * 1000L
             when (Random.nextInt(7)) {
                 1 -> {
                     runDelayed(500) {
@@ -169,7 +171,7 @@ class ToiletBot(botKey: String) {
             runDelayed(twoMinutesMilly) {
                 bot.sendPhoto(chatId, FileId(LEAVE_TOILET_IMAGE_URL), "$username, 5 минут")
             }
-            runDelayed(sevenMinutesMilly) {
+            runDelayed(threeMinutesMilly + twoMinutesMilly) {
                 bot.sendPhoto(
                     chatId,
                     FileId(POOP_FORBIDDEN_IMAGE_URL),

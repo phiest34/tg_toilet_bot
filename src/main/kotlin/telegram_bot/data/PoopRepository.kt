@@ -55,6 +55,26 @@ class PoopRepository : CoroutineScope {
         return stringBuilder.toString()
     }
 
+    fun getTopFiveUser(): String {
+        val stringBuilder = StringBuilder()
+        val uniqueList = mutableListOf<PoopModel>()
+        poopHistory
+            .groupBy { it.userName }
+            .values
+            .forEach {
+                uniqueList.add(it.maxByOrNull { it.poopingTimeInMillis }!!)
+            }
+        uniqueList
+            .sortedByDescending { it.poopingTimeInMillis }
+            .subList(0, 5)
+            .forEachIndexed { index, poopModel ->
+                stringBuilder.append(
+                    "${index + 1}. ${poopModel.userName} срал ${poopModel.formattedPoopingTime}\n"
+                )
+            }
+        return stringBuilder.toString()
+    }
+
     fun setPoopInfo(userId: UserId?, userName: String, job: Job?) {
         currentPoopingPersonId = userId
         PoopModel(userName, System.currentTimeMillis()).also {
