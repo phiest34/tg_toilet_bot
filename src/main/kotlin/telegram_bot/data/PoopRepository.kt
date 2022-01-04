@@ -1,9 +1,15 @@
 package telegram_bot.data
 
 import dev.inmo.tgbotapi.types.UserId
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import telegram_bot.util.asMillyGetFormatTime
 import java.io.File
+import kotlin.collections.set
 import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
@@ -93,6 +99,23 @@ class PoopRepository : CoroutineScope {
         }
     }
 
+    suspend fun getRandomJoke(): String = withContext(Dispatchers.IO) {
+        HttpClient(CIO).let {
+            val response: HttpResponse = it.get("https://www.anekdot.ru/rss/randomu.html") {
+                headers {
+                    append(HttpHeaders.Accept, "text/html")
+                }
+
+            }
+            return@withContext response.readText()
+                .substringAfter("[\\\"")
+                .substringBeforeLast("\\\"")
+                .replace("\\", "")
+                .replace("<br>", "")
+        }
+
+    }
+
     fun getPoopInfoByUserName(userName: String): PoopModel = poopHistory.last {
         userName == it.userName
     }
@@ -106,11 +129,6 @@ class PoopRepository : CoroutineScope {
     } else {
         "Пока что никто не срал."
     }
-
-    private fun <T, R> pairOf(first: T, second: R): Pair<T, R> = Pair(first, second)
-
-    private fun <T, R> isPairNullByFields(pair: Pair<T?, R?>) =
-        pair.first == null && pair.second == null
 
     companion object {
         private const val FILENAME = "src/main/kotlin/telegram_bot/log/Log.txt"

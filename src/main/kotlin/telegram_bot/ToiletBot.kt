@@ -14,10 +14,7 @@ import dev.inmo.tgbotapi.extensions.utils.asTextContent
 import dev.inmo.tgbotapi.requests.abstracts.FileId
 import dev.inmo.tgbotapi.types.ChatId
 import dev.inmo.tgbotapi.utils.PreviewFeature
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import telegram_bot.data.PoopRepository
 import kotlin.random.Random
 
@@ -28,9 +25,8 @@ class ToiletBot(botKey: String) {
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
-    @OptIn(PreviewFeature::class)
+    @OptIn(PreviewFeature::class, InternalCoroutinesApi::class)
     suspend fun onStartPolling() {
-
         bot.buildBehaviourWithLongPolling(scope) {
             val me = getMe()
 
@@ -60,7 +56,9 @@ class ToiletBot(botKey: String) {
                                     repository.setPoopInfo(
                                         user.id,
                                         username,
-                                        wakeUpJob(contentMessage.chat.id, username)
+                                        wakeUpJob(contentMessage.chat.id, username).apply {
+
+                                        }
                                     )
                                 }
                             } else {
@@ -125,57 +123,75 @@ class ToiletBot(botKey: String) {
                 }
             }
             println(me)
+        }.apply {
+            invokeOnCompletion(onCancelling = true) {
+                println("main coroutine canceled")
+            }
         }.join()
     }
 
     private fun wakeUpJob(chatId: ChatId, username: String) = scope.launch {
-        val twoMinutesMilly = 2 * 60 * 1000L
-        val threeMinutesMilly = 3 * 60 * 1000L
-        val sevenMinutesMilly = 7 * 60 * 1000L
-        when (Random.nextInt(7)) {
-            1 -> {
-                runDelayed(500) {
-                    bot.sendPhoto(chatId, FileId(POOP_RULE_IMAGE_URL), "$username, не забывай об осанке")
+        runCatching {
+            val twoMinutesMilly = 2 * 60 * 1000L
+            val threeMinutesMilly = 3 * 60 * 1000L
+            val sevenMinutesMilly = 7 * 60 * 1000L
+            when (Random.nextInt(7)) {
+                1 -> {
+                    runDelayed(500) {
+                        bot.sendPhoto(chatId, FileId(POOP_RULE_IMAGE_URL), "$username, не забывай об осанке")
+                    }
+                }
+                2 -> {
+                    runDelayed(500) {
+                        bot.sendMessage(chatId, "$username желаю приятно провести время")
+                    }
+                }
+                3 -> {
+                    runDelayed(500) {
+                        bot.sendMessage(
+                            chatId,
+                            "$username не забывай о правилах туалета! Узнать их можно с помощью команды /rules"
+                        )
+                    }
+                }
+                4, 5, 6 -> {
+                    runDelayed(500) {
+                        bot.sendMessage(chatId = chatId, text = repository.getRandomJoke())
+                    }
                 }
             }
-            2 -> {
-                runDelayed(500) {
-                    bot.sendMessage(chatId, "$username желаю приятно провести время")
+
+            runDelayed(threeMinutesMilly) {
+                if (Random.nextBoolean()) {
+                    bot.sendMessage(chatId, "Внимание, $username вы срете уже 3 минуты!! Не забывайте о времени")
                 }
             }
-            3 -> {
-                runDelayed(500) {
-                    bot.sendMessage(
-                        chatId,
-                        "$username не забывай о правилах туалета! Узнать их можно с помощью команды /rules"
-                    )
-                }
+            runDelayed(twoMinutesMilly) {
+                bot.sendPhoto(chatId, FileId(LEAVE_TOILET_IMAGE_URL), "$username, 5 минут")
             }
-        }
-        runDelayed(threeMinutesMilly) {
-            if (Random.nextBoolean()) {
-                bot.sendMessage(chatId, "Внимание, $username вы срете уже 3 минуты!! Не забывайте о времени")
+            runDelayed(sevenMinutesMilly) {
+                bot.sendPhoto(
+                    chatId,
+                    FileId(POOP_FORBIDDEN_IMAGE_URL),
+                    "$username 10 минут прошло, все съеби уже не смешно"
+                )
             }
-        }
-        runDelayed(twoMinutesMilly) {
-            bot.sendPhoto(chatId, FileId(LEAVE_TOILET_IMAGE_URL), "$username, 5 минут")
-        }
-        runDelayed(sevenMinutesMilly) {
-            bot.sendPhoto(
-                chatId,
-                FileId(POOP_FORBIDDEN_IMAGE_URL),
-                "$username 10 минут прошло, все съеби уже не смешно"
-            )
-        }
-        runDelayed(twoMinutesMilly * 2) {
-            bot.sendPhoto(chatId, FileId(STOP_POOP_IMAGE_URL), "$username через 6 минут ты нарушишь правило туалета")
-        }
-        runDelayed(twoMinutesMilly * 3) {
-            bot.sendPhoto(
-                chatId,
-                FileId(EXTRA_WARNING_IMAGE_URL),
-                "ВЫ СРЕТЕ УЖЕ БОЛЕЕ 20 МИНУТ НЕМЕДЛЕННО ПОКИНЬТЕ ПАРАШУ!!!!"
-            )
+            runDelayed(twoMinutesMilly * 2) {
+                bot.sendPhoto(
+                    chatId,
+                    FileId(STOP_POOP_IMAGE_URL),
+                    "$username через 6 минут ты нарушишь правило туалета"
+                )
+            }
+            runDelayed(twoMinutesMilly * 3) {
+                bot.sendPhoto(
+                    chatId,
+                    FileId(EXTRA_WARNING_IMAGE_URL),
+                    "$username $username $username, ВЫ СРЕТЕ УЖЕ БОЛЕЕ 20 МИНУТ НЕМЕДЛЕННО ПОКИНЬТЕ ПАРАШУ!!!!"
+                )
+            }
+        }.onSuccess { println("coroutine worked successfully") }.onFailure { ex ->
+            println(ex.message)
         }
     }
 
@@ -194,7 +210,7 @@ class ToiletBot(botKey: String) {
         private const val POOP_RULE_IMAGE_URL =
             "https://cs10.pikabu.ru/video/2018/07/20/10/og_og_153210878938386180.jpg"
         private const val LEAVE_TOILET_IMAGE_URL =
-            "https://lh3.googleusercontent.com/proxy/sijmFgHhD5LD_jNI2lD56os1R1nPpRZ6vjage_uRgI2nj3EM_ZUQ-_0-GmmTml0f8bHU8e9EcGe0hIS4h6cUxK3EjOO6NYxHfKnlpdg"
+            "https://i.ytimg.com/vi/4dnbD2IFI50/hqdefault.jpg"
     }
 
 }
